@@ -33,7 +33,7 @@ export default function SearchFilterBar({
     <div className="flex flex-wrap items-center gap-2 mb-4">
       <input
         type="text"
-        placeholder="Buscar por nombre..."
+        placeholder="Buscar por cliente..."
         value={busqueda}
         onChange={(e) => onBusquedaChange(e.target.value)}
         className="rounded-input border border-divider bg-card px-3 py-1.5 text-sm flex-1 min-w-[180px] focus:outline-none focus:ring-2 focus:ring-focus"

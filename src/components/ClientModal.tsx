@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cliente, Etapa, ETAPAS, RUBROS, SERVICIOS } from "@/lib/types";
+import { Cliente, Etapa, ETAPAS, RESULTADOS, RUBROS, SERVICIOS } from "@/lib/types";
 import { formatoFecha, nuevoId } from "@/lib/utils";
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
   onGuardar: (cliente: Cliente) => void;
   onEliminar: (id: string) => void;
 }
+
+const OPCION_NUEVO_RUBRO = "__nuevo_rubro__";
 
 const vacio = (): Cliente => ({
   id: nuevoId("c"),
@@ -28,10 +30,37 @@ const vacio = (): Cliente => ({
 export default function ClientModal({ cliente, onClose, onGuardar, onEliminar }: Props) {
   const [form, setForm] = useState<Cliente>(cliente ?? vacio());
   const [notaNueva, setNotaNueva] = useState("");
+  const [notaEditandoId, setNotaEditandoId] = useState<string | null>(null);
+  const [textoEdicionNota, setTextoEdicionNota] = useState("");
+
+  // Si el cliente ya tenía un rubro que no está en la lista fija, arrancamos
+  // mostrando el campo de texto libre directamente (para no perderlo).
+  const [agregandoRubro, setAgregandoRubro] = useState(
+    () => !!form.etiqueta && !(RUBROS as readonly string[]).includes(form.etiqueta)
+  );
+  const [rubroNuevo, setRubroNuevo] = useState(agregandoRubro ? form.etiqueta : "");
+
   const esNuevo = cliente === null;
 
   function actualizar<K extends keyof Cliente>(campo: K, valor: Cliente[K]) {
     setForm((prev) => ({ ...prev, [campo]: valor }));
+  }
+
+  function manejarCambioRubro(valor: string) {
+    if (valor === OPCION_NUEVO_RUBRO) {
+      setAgregandoRubro(true);
+      setRubroNuevo("");
+      actualizar("etiqueta", "");
+      return;
+    }
+    setAgregandoRubro(false);
+    actualizar("etiqueta", valor);
+  }
+
+  function confirmarRubroNuevo(valor: string) {
+    const limpio = valor.trim();
+    setRubroNuevo(valor);
+    actualizar("etiqueta", limpio);
   }
 
   function agregarNota() {
@@ -43,6 +72,36 @@ export default function ClientModal({ cliente, onClose, onGuardar, onEliminar }:
     };
     setForm((prev) => ({ ...prev, notas: [...prev.notas, nota], fechaUltimoContacto: nota.fecha }));
     setNotaNueva("");
+  }
+
+  function empezarEdicionNota(id: string, textoActual: string) {
+    setNotaEditandoId(id);
+    setTextoEdicionNota(textoActual);
+  }
+
+  function guardarEdicionNota() {
+    if (!notaEditandoId) return;
+    const texto = textoEdicionNota.trim();
+    if (!texto) {
+      cancelarEdicionNota();
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      notas: prev.notas.map((n) => (n.id === notaEditandoId ? { ...n, texto } : n)),
+    }));
+    setNotaEditandoId(null);
+    setTextoEdicionNota("");
+  }
+
+  function cancelarEdicionNota() {
+    setNotaEditandoId(null);
+    setTextoEdicionNota("");
+  }
+
+  function eliminarNota(id: string) {
+    setForm((prev) => ({ ...prev, notas: prev.notas.filter((n) => n.id !== id) }));
+    if (notaEditandoId === id) cancelarEdicionNota();
   }
 
   function guardar() {
@@ -102,18 +161,43 @@ export default function ClientModal({ cliente, onClose, onGuardar, onEliminar }:
             </div>
             <div>
               <label className={campoLabel}>Rubro</label>
-              <select
-                value={form.etiqueta}
-                onChange={(e) => actualizar("etiqueta", e.target.value)}
-                className={campoInput}
-              >
-                <option value="">Seleccionar...</option>
-                {RUBROS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+              {!agregandoRubro ? (
+                <select
+                  value={form.etiqueta}
+                  onChange={(e) => manejarCambioRubro(e.target.value)}
+                  className={campoInput}
+                >
+                  <option value="">Seleccionar...</option>
+                  {RUBROS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                  <option value={OPCION_NUEVO_RUBRO}>+ Agregar nuevo rubro...</option>
+                </select>
+              ) : (
+                <div className="flex gap-1">
+                  <input
+                    autoFocus
+                    value={rubroNuevo}
+                    onChange={(e) => confirmarRubroNuevo(e.target.value)}
+                    placeholder="Nombre del rubro"
+                    className={campoInput}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAgregandoRubro(false);
+                      setRubroNuevo("");
+                      actualizar("etiqueta", "");
+                    }}
+                    className="text-xs text-muted hover:text-body px-1"
+                    title="Volver a la lista"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -165,23 +249,100 @@ export default function ClientModal({ cliente, onClose, onGuardar, onEliminar }:
             )}
           </div>
 
+          {form.etapa === "cerrado" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={campoLabel}>Resultado</label>
+                <select
+                  value={form.resultado ?? ""}
+                  onChange={(e) =>
+                    actualizar("resultado", (e.target.value || undefined) as Cliente["resultado"])
+                  }
+                  className={campoInput}
+                >
+                  <option value="">Seleccionar...</option>
+                  {RESULTADOS.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.titulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={campoLabel}>¿Qué pasó?</label>
+                <input
+                  value={form.notaCierre ?? ""}
+                  onChange={(e) => actualizar("notaCierre", e.target.value)}
+                  placeholder="Resumen del cierre..."
+                  className={campoInput}
+                />
+              </div>
+            </div>
+          )}
+
           <div>
             <label className={campoLabel}>Bitácora</label>
-            <div className="space-y-1 max-h-28 overflow-y-auto rounded-input border border-divider p-2 mb-2 bg-fog">
+            <div className="space-y-1 max-h-32 overflow-y-auto rounded-input border border-divider p-2 mb-2 bg-fog">
               {form.notas.length === 0 && (
                 <p className="text-xs text-muted">Todavía no hay notas.</p>
               )}
-              {form.notas.map((n) => (
-                <p key={n.id} className="text-xs text-body">
-                  <span className="text-muted">{formatoFecha(n.fecha)} — </span>
-                  {n.texto}
-                </p>
-              ))}
+              {form.notas.map((n) =>
+                notaEditandoId === n.id ? (
+                  <div key={n.id} className="flex gap-1 items-center">
+                    <input
+                      autoFocus
+                      value={textoEdicionNota}
+                      onChange={(e) => setTextoEdicionNota(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") guardarEdicionNota();
+                        if (e.key === "Escape") cancelarEdicionNota();
+                      }}
+                      className="flex-1 rounded-input border border-divider bg-card px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-focus"
+                    />
+                    <button
+                      onClick={guardarEdicionNota}
+                      className="text-xs text-accent hover:underline shrink-0"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={cancelarEdicionNota}
+                      className="text-xs text-muted hover:underline shrink-0"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div key={n.id} className="flex gap-2 items-start justify-between group">
+                    <p className="text-xs text-body">
+                      <span className="text-muted">{formatoFecha(n.fecha)} — </span>
+                      {n.texto}
+                    </p>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => empezarEdicionNota(n.id, n.texto)}
+                        className="text-xs text-accent hover:underline"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => eliminarNota(n.id)}
+                        className="text-xs text-dot-red hover:underline"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
             <div className="flex gap-2">
               <input
                 value={notaNueva}
                 onChange={(e) => setNotaNueva(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") agregarNota();
+                }}
                 placeholder="Agregar nota rápida..."
                 className={`flex-1 ${campoInput}`}
               />

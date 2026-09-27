@@ -8,6 +8,7 @@ import KanbanColumn from "@/components/KanbanColumn";
 import SummaryPanel from "@/components/SummaryPanel";
 import SearchFilterBar from "@/components/SearchFilterBar";
 import ClientModal from "@/components/ClientModal";
+import HistorialPanel from "@/components/HistorialPanel";
 
 export default function Home() {
   const [clientes, setClientes] = useState<Cliente[]>(() => crearClientesDeEjemplo());
@@ -15,6 +16,7 @@ export default function Home() {
   const [etiquetaSeleccionada, setEtiquetaSeleccionada] = useState("");
   const [responsableSeleccionado, setResponsableSeleccionado] = useState("");
   const [clienteEnEdicion, setClienteEnEdicion] = useState<Cliente | null | undefined>(undefined);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
   const inputImportarRef = useRef<HTMLInputElement>(null);
 
   const etiquetas = useMemo(
@@ -24,6 +26,11 @@ export default function Home() {
 
   const responsables = useMemo(
     () => Array.from(new Set(clientes.map((c) => c.responsable).filter(Boolean))).sort(),
+    [clientes]
+  );
+
+  const clientesHistorial = useMemo(
+    () => clientes.filter((c) => c.etapa === "cerrado"),
     [clientes]
   );
 
@@ -129,6 +136,16 @@ export default function Home() {
             onDrop={handleDrop}
           />
         ))}
+      </div>
+
+      <div className="mt-4">
+        <button
+          onClick={() => setMostrarHistorial((v) => !v)}
+          className="text-sm text-accent hover:underline"
+        >
+          {mostrarHistorial ? "Ocultar historial de clientes ▲" : "Ver historial de clientes ▼"}
+        </button>
+        {mostrarHistorial && <HistorialPanel clientes={clientesHistorial} />}
       </div>
 
       {clienteEnEdicion !== undefined && (

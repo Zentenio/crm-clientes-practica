@@ -7,6 +7,13 @@ export const ETAPAS: { id: Etapa; titulo: string }[] = [
   { id: "cerrado", titulo: "Cerrado" },
 ];
 
+export type Resultado = "ganado" | "perdido";
+
+export const RESULTADOS: { id: Resultado; titulo: string }[] = [
+  { id: "ganado", titulo: "Ganado" },
+  { id: "perdido", titulo: "Perdido" },
+];
+
 // Líneas de servicio reales de Zentenio (zentenio.com)
 export const SERVICIOS = [
   "Integración y automatización de datos",
@@ -43,6 +50,8 @@ export interface Cliente {
   fechaUltimoContacto: string; // ISO date
   progreso: number; // 0-100, solo aplica en etapa "activo"
   notas: Nota[];
+  resultado?: Resultado; // solo aplica cuando etapa es "cerrado"
+  notaCierre?: string; // que paso con el cliente al cerrar
 }
 
 export interface DatosExportados {
