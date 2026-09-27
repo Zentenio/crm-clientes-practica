@@ -6,6 +6,9 @@ interface Props {
   etiquetaSeleccionada: string;
   etiquetas: string[];
   onEtiquetaChange: (v: string) => void;
+  responsableSeleccionado: string;
+  responsables: string[];
+  onResponsableChange: (v: string) => void;
   onNuevoCliente: () => void;
   onExportar: () => void;
   onImportarClick: () => void;
@@ -18,6 +21,9 @@ export default function SearchFilterBar({
   etiquetaSeleccionada,
   etiquetas,
   onEtiquetaChange,
+  responsableSeleccionado,
+  responsables,
+  onResponsableChange,
   onNuevoCliente,
   onExportar,
   onImportarClick,
@@ -41,6 +47,18 @@ export default function SearchFilterBar({
         {etiquetas.map((e) => (
           <option key={e} value={e}>
             {e}
+          </option>
+        ))}
+      </select>
+      <select
+        value={responsableSeleccionado}
+        onChange={(e) => onResponsableChange(e.target.value)}
+        className="rounded-input border border-divider bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-focus"
+      >
+        <option value="">Todos los responsables</option>
+        {responsables.map((r) => (
+          <option key={r} value={r}>
+            {r}
           </option>
         ))}
       </select>

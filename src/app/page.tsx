@@ -13,6 +13,7 @@ export default function Home() {
   const [clientes, setClientes] = useState<Cliente[]>(() => crearClientesDeEjemplo());
   const [busqueda, setBusqueda] = useState("");
   const [etiquetaSeleccionada, setEtiquetaSeleccionada] = useState("");
+  const [responsableSeleccionado, setResponsableSeleccionado] = useState("");
   const [clienteEnEdicion, setClienteEnEdicion] = useState<Cliente | null | undefined>(undefined);
   const inputImportarRef = useRef<HTMLInputElement>(null);
 
@@ -21,13 +22,19 @@ export default function Home() {
     [clientes]
   );
 
+  const responsables = useMemo(
+    () => Array.from(new Set(clientes.map((c) => c.responsable).filter(Boolean))).sort(),
+    [clientes]
+  );
+
   const clientesFiltrados = useMemo(() => {
     return clientes.filter((c) => {
       const coincideBusqueda = c.nombre.toLowerCase().includes(busqueda.toLowerCase());
       const coincideEtiqueta = !etiquetaSeleccionada || c.etiqueta === etiquetaSeleccionada;
-      return coincideBusqueda && coincideEtiqueta;
+      const coincideResponsable = !responsableSeleccionado || c.responsable === responsableSeleccionado;
+      return coincideBusqueda && coincideEtiqueta && coincideResponsable;
     });
-  }, [clientes, busqueda, etiquetaSeleccionada]);
+  }, [clientes, busqueda, etiquetaSeleccionada, responsableSeleccionado]);
 
   function moverCliente(id: string, etapa: Etapa) {
     setClientes((prev) => prev.map((c) => (c.id === id ? { ...c, etapa } : c)));
@@ -94,6 +101,9 @@ export default function Home() {
         etiquetaSeleccionada={etiquetaSeleccionada}
         etiquetas={etiquetas}
         onEtiquetaChange={setEtiquetaSeleccionada}
+        responsableSeleccionado={responsableSeleccionado}
+        responsables={responsables}
+        onResponsableChange={setResponsableSeleccionado}
         onNuevoCliente={() => setClienteEnEdicion(null)}
         onExportar={() => exportarClientes(clientes)}
         onImportarClick={() => inputImportarRef.current?.click()}
