@@ -116,12 +116,26 @@ export default function ClientModal({ cliente, onClose, onGuardar, onEliminar }:
   return (
     <div className="fixed inset-0 bg-[rgba(2,5,32,0.45)] flex items-center justify-center p-4 z-50">
       <div className="bg-card rounded-modal shadow-modal w-full max-w-lg max-h-[90vh] overflow-y-auto p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-ink">
-            {esNuevo ? "Nuevo cliente" : "Editar cliente"}
-          </h2>
-          <button onClick={onClose} className="text-muted hover:text-body text-sm">
-            Cerrar
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-divider">
+          <div className="flex items-center gap-2.5">
+            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-accent-soft text-accent shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="8" r="4.2" />
+              </svg>
+            </span>
+            <h2 className="text-base font-semibold text-ink">
+              {esNuevo ? "Nuevo cliente" : "Editar cliente"}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="flex items-center justify-center h-7 w-7 rounded-full text-muted hover:text-body hover:bg-fog transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
         </div>
 

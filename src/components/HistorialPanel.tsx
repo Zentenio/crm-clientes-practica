@@ -13,10 +13,13 @@ export default function HistorialPanel({ clientes }: Props) {
   );
 
   return (
-    <div className="rounded-column bg-wash shadow-column p-3">
-      <h2 className="text-sm font-semibold text-ink mb-2">
-        Historial de clientes ({ordenados.length})
-      </h2>
+    <div className="rounded-column bg-wash border border-divider p-3">
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-sm font-semibold text-ink">Historial de clientes</h2>
+        <span className="text-[11px] font-medium text-caption bg-card border border-divider rounded-pill px-2 py-0.5">
+          {ordenados.length}
+        </span>
+      </div>
       {ordenados.length === 0 ? (
         <p className="text-xs text-muted">Todavía no hay clientes cerrados.</p>
       ) : (

@@ -27,17 +27,16 @@ export default function KanbanColumn({ etapa, titulo, clientes, onCardClick, onD
     <div
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => onDrop(etapa, e)}
-      className="flex-1 min-w-[240px] bg-wash rounded-column shadow-column p-3 flex flex-col"
+      className="flex-1 min-w-[240px] bg-wash border border-divider rounded-column p-3 flex flex-col"
     >
       <div className="mb-3 flex items-center gap-2">
         <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${DOT_COLOR[etapa]}`} />
-        <div>
-          <h3 className="text-sm font-semibold text-ink">{titulo}</h3>
-          <p className="text-xs text-muted">
-            {clientes.length} {clientes.length === 1 ? "cliente" : "clientes"} · {formatoMoneda(totalMonto)}
-          </p>
-        </div>
+        <h3 className="text-sm font-semibold text-ink flex-1 truncate">{titulo}</h3>
+        <span className="text-[11px] font-medium text-caption bg-card border border-divider rounded-pill px-2 py-0.5 shrink-0">
+          {clientes.length}
+        </span>
       </div>
+      <p className="text-xs text-muted mb-2 -mt-1.5">{formatoMoneda(totalMonto)}</p>
       <div className="flex-1 overflow-y-auto">
         {clientes.map((c) => (
           <ClientCard
