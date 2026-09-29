@@ -26,4 +26,4 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'cd /var/www/crm-clientes-practica && ./scripts/deploy.sh'
+          ssh -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'cd /var/www/crm-clientes-practica && bash scripts/deploy.sh'
